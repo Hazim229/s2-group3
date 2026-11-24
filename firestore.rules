@@ -1,0 +1,56 @@
+rules_version = '2';
+
+// CampusEats · s2-group5
+// Each member adds their feature's rule inside their own block below, by pull request.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Shared helpers · owner Setup lead ──
+    function signedIn() { return request.auth != null; }
+    function profile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function isAdmin() { return signedIn() && profile().role == 'admin'; }
+    function isVendorOf(shopId) {
+      return signedIn() && profile().role == 'vendor' && profile().shopId == shopId;
+    }
+
+    // ── Users and roles · owner Setup lead ──
+    // users/{uid}: { role: 'student' | 'vendor' | 'admin', shopId?: '<vendor id>' }
+    // Students may create their own doc as 'student'; only the admin sets role or shopId.
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if signedIn() && request.auth.uid == uid
+                    && request.resource.data.role == 'student'
+                    && !('shopId' in request.resource.data);
+      allow update: if isAdmin()
+                    || (signedIn() && request.auth.uid == uid
+                        && !request.resource.data.diff(resource.data).affectedKeys()
+                              .hasAny(['role', 'shopId']));
+      allow delete: if isAdmin();
+    }
+
+    // ── Shops and menus · owner Setup lead ──
+    // Everyone reads; only that shop's vendor (or the admin) writes.
+    match /vendors/{shopId} {
+      allow read: if true;
+      allow write: if isVendorOf(shopId) || isAdmin();
+
+      match /menu/{itemId} {
+        allow read: if true;
+        allow write: if isVendorOf(shopId) || isAdmin();
+      }
+    }
+
+    // ── Feature · owner 2419247 ──
+
+    // ── Feature · owner 2410509 ──
+
+    // ── Feature · owner 2417219 ──
+
+    // ── Feature · owner 2416443 ──
+
+    // ── Feature · owner 2410687 ──
+  }
+}
