@@ -1,6 +1,11 @@
+// Feature: Base · shops from Firestore
+// Owner: 2419247
 import { useEffect, useState } from 'react'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { db } from '../firebase.js'
 
-// Custom hook that hides the fetch / loading / error logic from Week 3 behind one call.
+// All shops, live from the vendors collection.
+// Same return values as the Week 5 fetch version, so HomePage did not change.
 export function useVendors() {
   const [vendors, setVendors] = useState([])
   const [loading, setLoading] = useState(true)
@@ -8,24 +13,20 @@ export function useVendors() {
   const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
-    const controller = new AbortController()
     setLoading(true)
     setError(null)
-
-    fetch('/api/vendors.json', { signal: controller.signal })
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        return res.json()
-      })
-      .then(setVendors)
-      .catch((err) => {
-        if (err.name !== 'AbortError') setError(err.message)
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false)
-      })
-
-    return () => controller.abort()
+    const unsubscribe = onSnapshot(
+      collection(db, 'vendors'),
+      (snapshot) => {
+        setVendors(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })))
+        setLoading(false)
+      },
+      (err) => {
+        setError(err.message)
+        setLoading(false)
+      },
+    )
+    return unsubscribe // stop listening when the page closes
   }, [reloadKey])
 
   const reload = () => setReloadKey((k) => k + 1)

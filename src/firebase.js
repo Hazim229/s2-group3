@@ -1,5 +1,8 @@
+// Feature: Base · Firebase setup (Firestore added)
+// Owner: 2419247
 import { initializeApp } from 'firebase/app'
 import { getAuth, connectAuthEmulator } from 'firebase/auth'
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore'
 
 // The config comes from .env.local (see .env.example). These values identify your
 // project; they are not secrets. Security comes from Firebase Auth and security rules.
@@ -14,7 +17,9 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
+export const db = getFirestore(app)
 
 if (import.meta.env.VITE_USE_EMULATORS === 'true') {
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true })
+  connectFirestoreEmulator(db, '127.0.0.1', 8080)
 }
