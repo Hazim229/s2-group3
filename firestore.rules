@@ -6,40 +6,48 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Shared helpers · owner Setup lead ──
+    // ── Shared helpers · owner 2419247 (Setup lead) ──
     function signedIn() { return request.auth != null; }
-    function profile() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    function role() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
     }
-    function isAdmin() { return signedIn() && profile().role == 'admin'; }
-    function isVendorOf(shopId) {
-      return signedIn() && profile().role == 'vendor' && profile().shopId == shopId;
+    function isAdmin()  { return signedIn() && role() == 'admin'; }
+    function isVendor() { return signedIn() && role() == 'vendor'; }
+    // The vendor who owns a shop: vendors/{shopId}.ownerUid == their uid.
+    // getAfter so a shop and its menu can be seeded in one batch.
+    function ownsShop(shopId) {
+      return isVendor()
+        && getAfter(/databases/$(database)/documents/vendors/$(shopId)).data.ownerUid == request.auth.uid;
     }
 
-    // ── Users and roles · owner Setup lead ──
-    // users/{uid}: { role: 'student' | 'vendor' | 'admin', shopId?: '<vendor id>' }
-    // Students may create their own doc as 'student'; only the admin sets role or shopId.
+    // ── Users and roles · owner 2419247 (Setup lead) ──
+    // users/{uid}: { role: 'student' | 'vendor' | 'admin', ... }
+    // A user may create their own doc as 'student'; only the admin changes role.
     match /users/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
       allow create: if signedIn() && request.auth.uid == uid
-                    && request.resource.data.role == 'student'
-                    && !('shopId' in request.resource.data);
+                    && request.resource.data.role == 'student';
       allow update: if isAdmin()
                     || (signedIn() && request.auth.uid == uid
-                        && !request.resource.data.diff(resource.data).affectedKeys()
-                              .hasAny(['role', 'shopId']));
+                        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']));
       allow delete: if isAdmin();
     }
 
-    // ── Shops and menus · owner Setup lead ──
-    // Everyone reads; only that shop's vendor (or the admin) writes.
+    // ── Shops and menus · owner 2419247 (Setup lead) ──
+    // Everyone reads. A vendor creates their shop with ownerUid = their own uid,
+    // and after that only that owner (or the admin) can change it. ownerUid cannot be changed.
     match /vendors/{shopId} {
       allow read: if true;
-      allow write: if isVendorOf(shopId) || isAdmin();
+      allow create: if isAdmin()
+                    || (isVendor() && request.resource.data.ownerUid == request.auth.uid);
+      allow update: if isAdmin()
+                    || (isVendor() && resource.data.ownerUid == request.auth.uid
+                        && request.resource.data.ownerUid == resource.data.ownerUid);
+      allow delete: if isAdmin();
 
       match /menu/{itemId} {
         allow read: if true;
-        allow write: if isVendorOf(shopId) || isAdmin();
+        allow write: if isAdmin() || ownsShop(shopId);
       }
     }
 
