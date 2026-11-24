@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// CampusEats · s2-group5
+// CampusEats · s2-group3
 // Each member adds their feature's rule inside their own block below, by pull request.
 
 service cloud.firestore {

@@ -1,10 +1,10 @@
-# CampusEats · s2-group5 (BICS 3301 Group Project)
+# CampusEats · s2-group3 (BICS 3301 Group Project)
 
 One CampusEats app with every member's shop, built together on GitHub and deployed on one
 Firebase project (Spark plan).
 
-- **Group:** Section 2, Group 5
-- **Repo:** `s2-group5`
+- **Group:** Section 2, Group 3
+- **Repo:** `s2-group3`
 - **Live URL:** _added at v1.0_
 - **Base app:** Week 5 starter (BICS 3301)
 - **Setup lead:** 2419247
