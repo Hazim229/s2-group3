@@ -13,9 +13,10 @@ service cloud.firestore {
     }
     function isAdmin()  { return signedIn() && role() == 'admin'; }
     function isVendor() { return signedIn() && role() == 'vendor'; }
-    // The vendor who owns a shop: vendors/{shopId}.ownerUid == their uid.
+    // shopOwner(shopId): the signed-in user is a vendor and vendors/{shopId}.ownerUid is their uid.
+    // Use it in your feature's rule, e.g. allow write: if shopOwner(request.resource.data.shopId);
     // getAfter so a shop and its menu can be seeded in one batch.
-    function ownsShop(shopId) {
+    function shopOwner(shopId) {
       return isVendor()
         && getAfter(/databases/$(database)/documents/vendors/$(shopId)).data.ownerUid == request.auth.uid;
     }
@@ -47,7 +48,7 @@ service cloud.firestore {
 
       match /menu/{itemId} {
         allow read: if true;
-        allow write: if isAdmin() || ownsShop(shopId);
+        allow write: if isAdmin() || shopOwner(shopId);
       }
     }
 
