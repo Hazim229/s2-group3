@@ -1,25 +1,19 @@
-# CampusEats · s2-group3 (BICS 3301 Group Project)
+# s2-group3 · Section 2 · Group 03
+Live: https://s2-group3.web.app
+
+| Matric | Role | Shop | Feature | Branch | Folder |
+|---|---|---|---|---|---|
+| 2419247 | Setup lead | Kafe Mahallah Zubair | TBD | TBD | TBD |
+| 2410509 | Member | Restoran Maju | TBD | TBD | TBD |
+| 2417219 | Member | Pokpan's Kitchen | TBD | TBD | TBD |
+| 2416443 | Member | Dinie Caffe | TBD | TBD | TBD |
+| 2410687 | Member | Mahallah Uthman Cafeteria | TBD | TBD | TBD |
+
+When you pick your feature, fill your row like this (no repeats in the group):
+`| 2419247 | Setup lead | Kafe Mahallah Zubair | Ratings | feature-ratings | src/features/ratings |`
 
 One CampusEats app with every member's shop, built together on GitHub and deployed on one
-Firebase project (Spark plan).
-
-- **Group:** Section 2, Group 3
-- **Repo:** `s2-group3`
-- **Live URL:** _added at v1.0_
-- **Base app:** Week 5 starter (BICS 3301)
-- **Setup lead:** 2419247
-
-## Members
-
-| Matric | Shop | Feature | Branch | Folder |
-|---|---|---|---|---|
-| 2419247 | Kafe Mahallah Zubair | _TBD_ | `feature-<name>` | `src/features/<name>/` |
-| 2410509 | Restoran Maju | _TBD_ | `feature-<name>` | `src/features/<name>/` |
-| 2417219 | Pokpan's Kitchen | _TBD_ | `feature-<name>` | `src/features/<name>/` |
-| 2416443 | Dinie Caffe | _TBD_ | `feature-<name>` | `src/features/<name>/` |
-| 2410687 | Mahallah Uthman Cafeteria | _TBD_ | `feature-<name>` | `src/features/<name>/` |
-
-No two members may pick the same feature.
+Firebase project (Spark plan). Base app: Week 5 starter (BICS 3301).
 
 ## Getting started
 
@@ -38,6 +32,7 @@ No two members may pick the same feature.
 - Your rule goes in your own block in `firestore.rules`.
 - Log AI use in `AI_USAGE.md`, one line per member per week.
 - Put screenshots of your feature (as vendor and as student) in `docs/`.
+- Your feature lives in `src/features/<name>/`.
 - Only the Setup lead runs `firebase deploy`, from `main`, after a merge.
 
 ## Roles
@@ -45,6 +40,7 @@ No two members may pick the same feature.
 - `users/{uid}.role` is `student` (default), `vendor` or `admin`. Only the admin changes roles.
 - Each shop document `vendors/<matric>-<shop>` has `ownerUid` = that member's uid.
   A vendor may change only the shop whose `ownerUid` is their own uid.
+- In your feature's rule, use `shopOwner(shopId)` to check that the signed-in user owns that shop.
 
 ## Releases
 
